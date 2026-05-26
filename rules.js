@@ -1,10 +1,4 @@
-const createRule = ({
-  id,
-  keywords,
-  response,
-  category,
-  exact = false,
-}) => {
+const createRule = ({ id, keywords, response, category, exact = false }) => {
   const escaped = keywords.join("|");
 
   return {
@@ -22,48 +16,24 @@ const RULES = [
   createRule({
     id: "greeting",
     exact: true,
-    keywords: [
-      "hi",
-      "hello",
-      "hey",
-      "howdy",
-      "sup",
-      "what'?s up",
-    ],
-    response:
-      "Hello! 👋 I'm your AI support agent. How can I help you today?",
+    keywords: ["hi", "hello", "hey", "howdy", "sup", "what'?s up"],
+    response: "Hello! 👋 I'm your AI support agent. How can I help you today?",
     category: "greeting",
   }),
 
   createRule({
     id: "goodbye",
     exact: true,
-    keywords: [
-      "bye",
-      "goodbye",
-      "see you",
-      "take care",
-      "cya",
-      "later",
-    ],
-    response:
-      "Goodbye! Feel free to come back if you need any more help. 👋",
+    keywords: ["bye", "goodbye", "see you", "take care", "cya", "later"],
+    response: "Goodbye! Feel free to come back if you need any more help. 👋",
     category: "farewell",
   }),
 
   createRule({
     id: "thanks",
     exact: true,
-    keywords: [
-      "thanks",
-      "thank you",
-      "thx",
-      "ty",
-      "cheers",
-      "appreciate it",
-    ],
-    response:
-      "You're welcome! Is there anything else I can help you with?",
+    keywords: ["thanks", "thank you", "thx", "ty", "cheers", "appreciate it"],
+    response: "You're welcome! Is there anything else I can help you with?",
     category: "courtesy",
   }),
 
@@ -97,22 +67,14 @@ const RULES = [
       "plans",
       "tier",
     ],
-    response:
-      "We offer Starter ($0), Pro ($29), and Enterprise plans.",
+    response: "We offer Starter ($0), Pro ($29), and Enterprise plans.",
     category: "faq",
   }),
 
   createRule({
     id: "refund",
-    keywords: [
-      "refund",
-      "money back",
-      "cancel",
-      "cancellation",
-      "return",
-    ],
-    response:
-      "We offer a 30-day money-back guarantee on all paid plans.",
+    keywords: ["refund", "money back", "cancel", "cancellation", "return"],
+    response: "We offer a 30-day money-back guarantee on all paid plans.",
     category: "faq",
   }),
 
@@ -144,32 +106,22 @@ const RULES = [
       "agent",
       "real person",
     ],
-    response:
-      "Contact us at support@example.com or use live chat.",
+    response: "Contact us at support@example.com or use live chat.",
     category: "contact",
   }),
 
   createRule({
     id: "status",
-    keywords: [
-      "status",
-      "outage",
-      "down",
-      "not working",
-      "incident",
-      "uptime",
-    ],
-    response:
-      "Check status.example.com for real-time system updates.",
+    keywords: ["status", "outage", "down", "not working", "incident", "uptime"],
+    response: "Check status.example.com for real-time system updates.",
     category: "faq",
   }),
 ];
 
-
 function matchRule(input = "") {
   const normalized = input.trim().toLowerCase();
 
-  return RULES.find(rule => rule.regex.test(normalized)) || null;
+  return RULES.find((rule) => rule.regex.test(normalized)) || null;
 }
 
 module.exports = {
