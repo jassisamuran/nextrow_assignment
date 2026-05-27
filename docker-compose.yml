@@ -1,0 +1,59 @@
+version: "3.9"
+
+services:
+  api:
+    build: ./backend
+    container_name: support-agent-api
+    ports:
+      - "3000:3000"
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - REDIS_URL=redis://redis:6379
+      - PORT=3000
+      - NODE_ENV=production
+      - CACHE_SIMILARITY_THRESHOLD=${CACHE_SIMILARITY_THRESHOLD:-0.92}
+      - CACHE_TTL=${CACHE_TTL:-3600}
+      - OPENAI_CHAT_MODEL=${OPENAI_CHAT_MODEL:-gpt-4o-mini}
+      - OPENAI_EMBEDDING_MODEL=${OPENAI_EMBEDDING_MODEL:-text-embedding-3-small}
+      - COST_INPUT_PER_1K=${COST_INPUT_PER_1K:-0.00015}
+      - COST_OUTPUT_PER_1K=${COST_OUTPUT_PER_1K:-0.00060}
+      - COST_EMBEDDING_PER_1K=${COST_EMBEDDING_PER_1K:-0.00002}
+    depends_on:
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - support-net
+
+  frontend:
+    build: ./frontend
+    container_name: support-agent-frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - api
+    restart: unless-stopped
+    networks:
+      - support-net
+
+  redis:
+    image: redis:7-alpine
+    container_name: support-agent-redis
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    restart: unless-stopped
+    networks:
+      - support-net
+
+volumes:
+  redis_data:
+
+networks:
+  support-net:
+    driver: bridge

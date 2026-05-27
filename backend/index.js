@@ -21,7 +21,7 @@ const limiter = rateLimit({
 });
 app.use("/api/chat", limiter);
 app.use("/api/chat", chatRouter);
-app.use("/api/stats",statsRouter );
+app.use("/api/stats",statsRouter);
 
 
 app.get("/api/health", async (req, res) => {
