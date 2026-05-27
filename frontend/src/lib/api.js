@@ -13,6 +13,10 @@ export async function sendChat(query, history = []) {
   }
   return res.json();
 }
+export async function fetchHealth() {
+  const res = await fetch(`${BASE}/api/health`);
+  return res.json();
+}
 
 export async function fetchStats() {
   const res = await fetch(`${BASE}/api/stats`);
