@@ -7,6 +7,7 @@ const rateLimit = require("express-rate-limit");
 const { WebSocketServer } = require("ws");
 const chatRouter = require("./chat");
 const PORT = parseInt(process.env.PORT || "3000", 10);
+const statsRouter=require("./routes/stats")
 
 const app = express();
 app.use(cors({ origin: "*" }));
@@ -20,6 +21,8 @@ const limiter = rateLimit({
 });
 app.use("/api/chat", limiter);
 app.use("/api/chat", chatRouter);
+app.use("/api/stats",statsRouter );
+
 
 app.get("/api/health", async (req, res) => {
   console.log("Now");
