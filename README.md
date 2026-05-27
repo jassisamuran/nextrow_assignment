@@ -159,21 +159,73 @@ npm start
 
 ---
 
-## Docker (run everything together)
+## Docker — Run Everything with One Command
+
+Docker Compose starts all three services (frontend, backend, Redis) together. The **frontend is served on `http://localhost/` (port 80)** via an Nginx container — no port number needed in the browser.
+
+### 1. Copy and configure the root `.env`
 
 ```bash
-# From project root
+# From the project root
 cp backend/.env.example .env
-# Edit .env and add OPENAI_API_KEY
+```
 
+Open `.env` and set your key:
+
+```env
+OPENAI_API_KEY=sk-your-key-here
+```
+
+All other variables have sensible defaults and don't need to be changed to get started.
+
+### 2. Build and start
+
+```bash
 docker compose up --build
 ```
 
-| Service | URL |
-|---------|-----|
-| Frontend | http://localhost:80 |
-| Backend API | http://localhost:3000 |
-| Redis | localhost:6379 |
+On subsequent runs (no code changes):
+
+```bash
+docker compose up
+```
+
+### 3. Service URLs
+
+| Service | URL | Notes |
+|---------|-----|-------|
+| **Frontend** | **http://localhost/** | React app served by Nginx on port 80 |
+| Backend API | http://localhost:3000 | Express + WebSocket |
+| Redis | localhost:6379 | Internal only; not exposed publicly |
+
+> The frontend container proxies `/api/*` and `/ws` requests to the backend automatically, so you never need to think about CORS in production.
+
+### 4. Tear down
+
+```bash
+# Stop containers (keeps volumes/data)
+docker compose down
+
+# Stop and wipe all data (Redis cache, stats)
+docker compose down -v
+```
+
+### 5. View logs per service
+
+```bash
+docker compose logs -f frontend
+docker compose logs -f backend
+docker compose logs -f redis
+```
+
+### Difference between local dev and Docker
+
+| | Local dev | Docker |
+|-|-----------|--------|
+| Frontend URL | http://localhost:3001 | **http://localhost/** |
+| Backend URL | http://localhost:3000 | http://localhost:3000 |
+| Redis | Must be running locally | Managed automatically |
+| Hot reload | ✅ Yes | ❌ Requires rebuild |
 
 ---
 
@@ -401,6 +453,18 @@ sudo systemctl start redis-server
 ```bash
 npm install uuid
 # Add to index.js: const { v4: uuidv4 } = require("uuid");
+```
+
+**Frontend shows blank page at `http://localhost/` in Docker**
+
+The React build must complete before Nginx serves it. Check the build logs:
+```bash
+docker compose logs frontend
+```
+If the build failed, rebuild from scratch:
+```bash
+docker compose down
+docker compose up --build
 ```
 
 ---
