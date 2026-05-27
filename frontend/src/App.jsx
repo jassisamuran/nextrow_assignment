@@ -31,7 +31,7 @@ export default function App() {
     }`;
 
   return (
-    <div className="h-screen flex flex-col bg-gray-50">
+    <div className=" flex flex-col bg-gray-50">
 
       <div className="flex items-center justify-between px-4 py-3 bg-white border-b shadow-sm">
         <div className="flex gap-2">
