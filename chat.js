@@ -1,7 +1,8 @@
 const express = require("express");
 const router = express.Router();
-const { route, routeStream } = require("../services/router");
+const { route, routeStream } = require("./aiRouter");
 
+// POST /api/chat
 router.post("/", async (req, res) => {
   const { query, history = [] } = req.body;
 
@@ -36,22 +37,19 @@ router.post("/", async (req, res) => {
     });
   } catch (err) {
     console.error("[/api/chat] Error:", err);
-
-    if (err?.status === 401) {
+    if (err?.status === 401)
       return res.status(500).json({ error: "Invalid OpenAI API key" });
-    }
-    if (err?.status === 429) {
+    if (err?.status === 429)
       return res
         .status(429)
         .json({ error: "OpenAI rate limit hit. Try again shortly." });
-    }
-
     return res
       .status(500)
       .json({ error: "Internal server error", detail: err.message });
   }
 });
 
+// POST /api/chat/stream  (SSE)
 router.post("/stream", async (req, res) => {
   const { query, history = [] } = req.body;
 
@@ -73,7 +71,6 @@ router.post("/stream", async (req, res) => {
     const meta = await routeStream(query.trim(), history, (chunk) => {
       sendEvent("chunk", { text: chunk });
     });
-
     sendEvent("done", { meta });
     res.end();
   } catch (err) {

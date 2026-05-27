@@ -1,13 +1,13 @@
 const { response } = require("express");
 const OpenAI = require("openai");
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+const openai = new OpenAI({ apiKey: process.env.OPENAI_ADMIN_KEY });
 const CHAT_MODEL = process.env.OPENAI_CHAT_MODEL || "gpt-4o-mini";
 const EMBEDDING_MODEL =
   process.env.OPENAI_EMBEDDING_MODEL || "text-embedding-3-small";
 
 const COST_INPUT = parseFloat(process.env.COST_INPUT_PER_1K || "0.00015");
 const COST_OUTPUT = parseFloat(process.env.COST_OUTPUT_PER_1K || "0.00060");
-
+console.log(process.env.OPENAI_ADMIN_KEY);
 const COST_EMBEDDING = parseFloat(
   process.env.COST_EMBEDDING_PER_1K || "0.00002",
 );
@@ -25,19 +25,19 @@ async function chat(userMessage, conversationHistory = []) {
     { role: "user", content: userMessage },
   ];
 
-  const response = await openai.chat.completions.create({
+  const completion = await openai.chat.completions.create({
     model: CHAT_MODEL,
     messages,
     temperature: 0.7,
     max_tokens: 512,
   });
 
-  const inputTokens = completions.usage.prompt_tokens;
-  const outputTokens = completions.usage.completions_tokens;
-  const costUSD = (input / 1000) * costUSD + (outputTokens / 1000) * costUSD;
-
+  const inputTokens = completion.usage.prompt_tokens;
+  const outputTokens = completion.usage.completion_tokens;
+  const costUSD =
+    (inputTokens / 1000) * COST_INPUT + (outputTokens / 1000) * COST_OUTPUT;
   return {
-    response: completions.choices[0].message.content,
+    response: completion.choices[0].message.content,
     inputTokens,
     outputTokens,
     costUSD,
@@ -46,11 +46,10 @@ async function chat(userMessage, conversationHistory = []) {
 }
 
 async function getEmbedding(text) {
-  const resposne = await openai.embeddings.create({
+  const response = await openai.embeddings.create({
     model: EMBEDDING_MODEL,
     input: text.slice(0, 8191),
   });
-
   const tokens = response.usage.total_tokens;
   const costUSD = (tokens / 1000) * COST_EMBEDDING;
 
