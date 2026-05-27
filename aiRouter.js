@@ -1,21 +1,13 @@
-
-
-const { RULES } = require("../config/rules");
+const { RULES } = require("./rules");
 const semanticCache = require("./semanticCache");
 const openaiService = require("./openaiService");
 const statsService = require("./statsService");
 
+function matchRule(input = "") {
+  const normalized = input.trim().toLowerCase();
 
-function matchRule(query) {
-  const trimmed = query.trim();
-  for (const rule of RULES) {
-    for (const pattern of rule.patterns) {
-      if (pattern.test(trimmed)) return rule;
-    }
-  }
-  return null;
+  return RULES.find((rule) => rule.regex.test(normalized)) || null;
 }
-
 
 async function route(query, conversationHistory = []) {
   const start = Date.now();
@@ -110,7 +102,6 @@ async function route(query, conversationHistory = []) {
   };
 }
 
-
 async function routeStream(query, conversationHistory = [], onChunk) {
   const start = Date.now();
 
@@ -119,7 +110,7 @@ async function routeStream(query, conversationHistory = [], onChunk) {
     const words = matchedRule.response.split(" ");
     for (const word of words) {
       onChunk(word + " ");
-      await new Promise((r) => setTimeout(r, 15)); 
+      await new Promise((r) => setTimeout(r, 15));
     }
 
     const latencyMs = Date.now() - start;
