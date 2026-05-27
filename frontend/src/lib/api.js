@@ -25,3 +25,19 @@ export async function fetchHistory(limit = 20) {
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   return res.json();
 }
+
+export async function fetchCacheEntries() {
+  const res = await fetch(`${BASE}/api/stats/cache`);
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return res.json();
+}
+
+export async function clearCache() {
+  const res = await fetch(`${BASE}/api/stats/cache/clear`, { method: 'POST' });
+  return res.json();
+}
+
+export async function resetStats() {
+  const res = await fetch(`${BASE}/api/stats/reset`, { method: 'POST' });
+  return res.json();
+}
