@@ -2,7 +2,6 @@ const express = require("express");
 const router = express.Router();
 const { route, routeStream } = require("./aiRouter");
 
-// POST /api/chat
 router.post("/", async (req, res) => {
   const { query, history = [] } = req.body;
 
@@ -49,7 +48,6 @@ router.post("/", async (req, res) => {
   }
 });
 
-// POST /api/chat/stream  (SSE)
 router.post("/stream", async (req, res) => {
   const { query, history = [] } = req.body;
 

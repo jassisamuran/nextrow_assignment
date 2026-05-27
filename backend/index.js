@@ -18,7 +18,7 @@ const limiter = rateLimit({
   legacyHeaders: false,
   message: { error: "Too many requests, please slow down." },
 });
-// app.use("/api/chat", limiter);
+app.use("/api/chat", limiter);
 app.use("/api/chat", chatRouter);
 
 app.get("/api/health", async (req, res) => {
