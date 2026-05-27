@@ -28,7 +28,7 @@ async function saveStats(stats) {
   await client.set(STATS_KEY, JSON.stringify(stats));
 }
 
-async function recordRequest(
+async function recordRequest({
   routeType,
   cacheHit = false,
   inputTokens = 0,
@@ -38,14 +38,14 @@ async function recordRequest(
   query = "",
   category = "",
   latencyMs = 0,
-) {
+}){
   const stats = await getStats();
   stats.totalRequests += 1;
 
   if (routeType == "rules") stats.rulesRouted += 1;
   else if (routeType === "llm") stats.llmRouted += 1;
 
-  if (cacheHit) stats.cacheHit += 1;
+  if (cacheHit) stats.cacheHits += 1;
   else if (routeType == "llm") stats.cacheMisses += 1;
 
   stats.totalTokensInput += inputTokens;

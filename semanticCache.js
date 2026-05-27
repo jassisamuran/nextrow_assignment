@@ -21,7 +21,7 @@ function cosineSimilarity(a, b) {
 async function findCachedResponse(query) {
   const { embedding, tokens } = await openaiService.getEmbedding(query);
   const client = await getRedisClient();
-  const keys = await client.keys(`${CACHE_PREFIX}`);
+  const keys = await client.keys(`${CACHE_PREFIX}*`);
 
   let bestMatch = null;
   let bestSimilarity = 0;

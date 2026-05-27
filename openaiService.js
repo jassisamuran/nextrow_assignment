@@ -7,7 +7,6 @@ const EMBEDDING_MODEL =
 
 const COST_INPUT = parseFloat(process.env.COST_INPUT_PER_1K || "0.00015");
 const COST_OUTPUT = parseFloat(process.env.COST_OUTPUT_PER_1K || "0.00060");
-console.log(process.env.OPENAI_ADMIN_KEY);
 const COST_EMBEDDING = parseFloat(
   process.env.COST_EMBEDDING_PER_1K || "0.00002",
 );
@@ -45,6 +44,45 @@ async function chat(userMessage, conversationHistory = []) {
   };
 }
 
+async function chatStream(userMessage, conversationHistory = [], onChunk) {
+  const messages = [
+    { role: "system", content: SYSTEM_PROMPT },
+    ...conversationHistory,
+    { role: "user", content: userMessage },
+  ];
+ 
+  const stream = await openai.chat.completions.create({
+    model: CHAT_MODEL,
+    messages,
+    temperature: 0.7,
+    max_tokens: 512,
+    stream: true,
+    stream_options: { include_usage: true },
+  });
+ 
+  let fullText = "";
+  let inputTokens = 0;
+  let outputTokens = 0;
+ 
+  for await (const chunk of stream) {
+    const delta = chunk.choices[0]?.delta?.content;
+    if (delta) {
+      fullText += delta;
+      onChunk(delta);
+    }
+ 
+    if (chunk.usage) {
+      inputTokens = chunk.usage.prompt_tokens;
+      outputTokens = chunk.usage.completion_tokens;
+    }
+  }
+ 
+  const costUSD =
+    (inputTokens / 1000) * COST_INPUT + (outputTokens / 1000) * COST_OUTPUT;
+ 
+  return { fullText, inputTokens, outputTokens, costUSD, model: CHAT_MODEL };
+}
+
 async function getEmbedding(text) {
   const response = await openai.embeddings.create({
     model: EMBEDDING_MODEL,
@@ -60,4 +98,4 @@ async function getEmbedding(text) {
   };
 }
 
-module.exports = { getEmbedding, chat };
+module.exports = { getEmbedding,chatStream, chat };
