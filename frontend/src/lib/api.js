@@ -41,3 +41,43 @@ export async function resetStats() {
   const res = await fetch(`${BASE}/api/stats/reset`, { method: 'POST' });
   return res.json();
 }
+
+export function streamChat(query, history = [], { onChunk, onDone, onError }) {
+  const ctrl = new AbortController();
+ 
+  fetch(`${BASE}/api/chat/stream`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ query, history }),
+    signal: ctrl.signal,
+  })
+    .then(async (res) => {
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let buf = '';
+ 
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buf += decoder.decode(value, { stream: true });
+ 
+        const lines = buf.split('\n');
+        buf = lines.pop();
+ 
+        for (const line of lines) {
+          if (line.startsWith('data:')) {
+            try {
+              const data = JSON.parse(line.slice(5).trim());
+              if (data.text !== undefined) onChunk(data.text);
+              if (data.meta !== undefined) onDone(data.meta);
+            } catch {}
+          }
+        }
+      }
+    })
+    .catch((err) => {
+      if (err.name !== 'AbortError') onError(err.message);
+    });
+ 
+  return () => ctrl.abort();
+}
