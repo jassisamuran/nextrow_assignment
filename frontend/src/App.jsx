@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import './App.css'
-import StatsPage from './pages/statsPage'
-import CachePage from './pages/CachePage'
-import ChatPage from './pages/ChatPage'
+import StatsPage from './components/statsPage'
+import CachePage from './components/CachePage'
+import ChatPage from './components/ChatPage'
 
 function App() {
   const [count, setCount] = useState(0)
