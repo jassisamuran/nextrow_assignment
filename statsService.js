@@ -1,4 +1,4 @@
-const { getredisClient, getRedisClient } = require("./redisClient");
+const { getRedisClient } = require("./redisClient");
 
 const STATS_KEY = "stats:global";
 const HISTORY_KEY = "stats:history";
@@ -18,21 +18,21 @@ const defaultStats = {
 };
 
 async function getStats() {
-  const client = await getredisClient();
+  const client = await getRedisClient();
   const raw = await client.get(STATS_KEY);
   return raw ? JSON.parse(raw) : { ...defaultStats };
 }
 
 async function saveStats(stats) {
-  const client = getredisClient();
-  await client.set(STATS_KEY, json.parse);
+  const client = await getRedisClient();
+  await client.set(STATS_KEY, JSON.stringify(stats));
 }
 
 async function recordRequest(
   routeType,
   cacheHit = false,
   inputTokens = 0,
-  outputTokes = 0,
+  outputTokens = 0,
   embeddingTokens = 0,
   costUSD = 0,
   query = "",
@@ -73,7 +73,7 @@ async function recordRequest(
 }
 
 async function getHistory(limit = 20) {
-  const client = await getredisClient();
+  const client = await getRedisClient();
   const items = await client.lRange(HISTORY_KEY, 0, limit - 1);
   return items.map((i) => JSON.parse(i));
 }
